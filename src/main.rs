@@ -1,5 +1,8 @@
-pub mod game;
+mod pong;
+use pong::game;
 
-fn main() {
-    game::Game::start();
+fn main()
+{
+   game::Game::start();   
+   
 }

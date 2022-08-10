@@ -1,28 +1,32 @@
 use ggez;
-use ggez::event::{self, EventHandler, MouseButton};
+use ggez::event::{self, EventHandler};
 use ggez::{graphics::{self,Color}, Context, GameResult};
 type Vector = ggez::mint::Vector2<f32>;
+mod ball;
 
-pub struct Game
+/// struct that handle the game managment/running and called with ggez::event
+pub(crate) struct Game
 {
 }
 
 impl Game{
+	/// create new Game struct
 	pub fn new(ctx: &mut Context) -> GameResult<Self>
 	{
 		let game = Game{};
 		Ok(game)
 	}
 
-	pub fn start() -> GameResult
+	/// start the game main loop with ggez::event::run
+	pub fn start() -> !
 	{
 		let cb = ggez::ContextBuilder::new("Pong Game","YotamST")
 			.window_setup(ggez::conf::WindowSetup::default().title("Pong!"));
 		let (mut ctx, event_loop) = cb.build().unwrap();
 		let state = Game::new(&mut ctx).unwrap();
 		event::run(ctx,event_loop,state);
-		Ok(())
 	}
+
 }
 
 impl EventHandler for Game
@@ -32,7 +36,8 @@ impl EventHandler for Game
 	{
 		Ok(())
 	}
-	    
+	
+	/// handle drawing each game loop 
 	fn draw(&mut self, _ctx: &mut Context) -> GameResult<()>
 	{
 		graphics::clear(_ctx,Color::BLACK);

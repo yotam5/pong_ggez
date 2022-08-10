@@ -1,6 +1,0 @@
-use ggez;
-
-struct Ball
-{
-	
-}
