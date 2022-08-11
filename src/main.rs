@@ -1,8 +1,7 @@
-mod pong;
-use pong::game;
-
+mod game;
+use game::game_state;
 fn main()
 {
-   game::Game::start();   
+   game_state::Game::start();   
    
 }
