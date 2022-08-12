@@ -8,6 +8,7 @@ use super::ball;
 /// struct that handle the game managment/running and called with ggez::event
 pub(crate) struct Game
 {
+	screen: graphics::ScreenImage,
 }
 
 impl Game{
@@ -15,6 +16,7 @@ impl Game{
 	pub fn new(ctx: &mut Context) -> GameResult<Self>
 	{
 		let game = Game{
+			screen : graphics::ScreenImage::new(ctx,graphics::ImageFormat::Rgba8UnormSrgb, 1., 1., 1),
 		};
 		Ok(game)
 	}
@@ -41,7 +43,7 @@ impl EventHandler for Game
 	{
 		const DESIRED_FPS: u32 = 60;
 		
-		while ggez::timer::check_update_time(_ctx, DESIRED_FPS)
+		while _ctx.time.check_update_time(DESIRED_FPS)
 		{
 
 		}
@@ -51,13 +53,15 @@ impl EventHandler for Game
 	/// handle drawing each game loop 
 	fn draw(&mut self, _ctx: &mut Context) -> GameResult<()>
 	{
-		graphics::clear(_ctx,Color::BLACK);
-
+		let my_rect = graphics::MeshBuilder::circle(&mut self, mode, point, radius, tolerance, color)
+		let my_circoe = graphics::Mesh::new_circle(gfx, mode, point, radius, tolerance, color)
+		
+		let mut canvas = graphics::Canvas::from_frame(_ctx, Color::BLACK);
 		//start drawing here
 
 		//end drawing here
 
-		graphics::present(_ctx)?;
+		
 		Ok(())
 	}
 }
