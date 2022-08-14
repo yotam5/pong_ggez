@@ -3,3 +3,9 @@
 height = 1080
 width = 1920
 fps = 60
+
+[paddle]
+height = 200
+width = 60
+speed_x = 0
+speed_y = 1
