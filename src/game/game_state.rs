@@ -1,19 +1,24 @@
-
-use super::config;
-use super::entity::Entity;
-use super::paddle::{self, Paddle};
 use ggez;
 use ggez::event::{self, EventHandler};
+use ggez::input::keyboard;
 use ggez::mint::{Point2, Vector2};
 use ggez::{
     graphics::{self, Color},
     Context, GameError, GameResult,
 };
 
+use crate::game::ball::Ball;
+
+use super::config;
+use super::entity::{Direction, Entity};
+use super::paddle::{self, Paddle};
+
 /// struct that handle the game managment/running and called with ggez::event
 pub(crate) struct Game {
-    player_paddle: paddle::Paddle,
+    player_paddle: Paddle,
+    bot_paddle: Paddle,
     conf: config::Config,
+    ball: Ball,
 }
 
 impl Game {
@@ -22,13 +27,42 @@ impl Game {
         let conf = config::Config::new("config.toml");
         let game = Game {
             player_paddle: Paddle::new(
-                Point2 { x: 0.0, y: 0.0 },
+                Point2 {
+                    x: conf.player_location.x as f32,
+                    y: conf.player_location.y as f32,
+                },
                 Vector2 {
                     x: conf.paddle.speed_x as f32,
                     y: conf.paddle.speed_y as f32,
                 },
                 conf.paddle.width as f32,
                 conf.paddle.height as f32,
+                conf.display.height as u16,
+            ),
+            bot_paddle: Paddle::new(
+                Point2 {
+                    x: conf.bot_location.x as f32,
+                    y: conf.bot_location.y as f32,
+                },
+                Vector2 {
+                    x: conf.paddle.speed_x as f32,
+                    y: conf.paddle.speed_y as f32,
+                },
+                conf.paddle.width as f32,
+                conf.paddle.height as f32,
+                conf.display.height as u16,
+            ),
+            ball: Ball::new(
+                _ctx,
+                Point2 {
+                    x: conf.ball.x as f32,
+                    y: conf.ball.y as f32,
+                },
+                Vector2 {
+                    x: conf.ball.speed_x as f32,
+                    y: conf.ball.speed_y as f32,
+                },
+                conf.ball.radius,
             ),
             conf,
         };
@@ -54,8 +88,17 @@ impl Game {
 impl EventHandler for Game {
     /// update the game each loop
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-
         while _ctx.time.check_update_time(self.conf.display.fps as u32) {}
+
+        let currently_pressed = _ctx.keyboard.pressed_keys();
+
+        for key in currently_pressed {
+            if let Some(direction) = Direction::from_keycode(key) {
+                self.player_paddle.update_position(&direction);
+                //println!("{}", "key preseed");
+            }
+        }
+
         Ok(())
     }
 
@@ -64,6 +107,8 @@ impl EventHandler for Game {
         let mut canvas = graphics::Canvas::from_frame(_ctx, Color::BLACK);
         //start drawing here
         self.player_paddle.draw(&mut canvas).unwrap();
+        self.bot_paddle.draw(&mut canvas).unwrap();
+        self.ball.draw(&mut canvas).unwrap();
         //end drawing here canvas.finish(_ctx)?;
         canvas.finish(_ctx)
     }
@@ -71,7 +116,7 @@ impl EventHandler for Game {
     fn key_down_event(
         &mut self,
         _ctx: &mut Context,
-        _input: ggez::input::keyboard::KeyInput,
+        _input: keyboard::KeyInput,
         _repeated: bool,
     ) -> Result<(), GameError> {
         Ok(())
