@@ -2,12 +2,14 @@ use super::entity::{self,Direction};
 use ggez::graphics::Color;
 use ggez::mint::{Point2, Vector2};
 use ggez::{self, graphics};
+use super::ball::Ball;
 
 /// paddle struct which player hit the ball with 
 pub(super) struct Paddle {
     velocity: Vector2<f32>,
     paddle: graphics::Rect,
     window_height: u16,
+    direction: Direction,
 }
 
 /// impl paddle functions
@@ -18,7 +20,8 @@ impl Paddle {
         Paddle {
             velocity,
             paddle: graphics::Rect::new(position.x, position.y, width, height),
-            window_height
+            window_height,
+            direction: Direction::None,
         }
     }
 
@@ -26,12 +29,14 @@ impl Paddle {
     fn move_up(&mut self)
     {
         self.paddle.y -= self.velocity.y;
+        self.direction = Direction::Up;
     }
 
     /// move the paddle down according to the current velocity
     fn move_down(&mut self)
     {
         self.paddle.y += self.velocity.y;
+        self.direction = Direction::Down;
     }
 
     /// update the paddle position according to the directions
@@ -50,8 +55,13 @@ impl Paddle {
                 }
             },
 
-            Direction::Right  | Direction::Left => {}
+           _  => {}
         }
+    }
+
+    pub fn hit_circle(&self,point: &Point2<f32>, radius: f32) -> bool
+    {
+        self.paddle.overlaps_circle(*point,radius)
     }
 }
 

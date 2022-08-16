@@ -1,6 +1,7 @@
 use ggez;
 use ggez::event::{self, EventHandler};
 use ggez::input::keyboard;
+use ggez::input::keyboard::KeyCode::P;
 use ggez::mint::{Point2, Vector2};
 use ggez::{
     graphics::{self, Color},
@@ -70,6 +71,14 @@ impl Game {
         Ok(game)
     }
 
+    fn ball_wall_collision(&self) -> bool {
+        let ball_center = self.ball.get_center();
+        let ball_radius = self.ball.get_radius() as f32;
+
+        ball_center.y + ball_radius >= self.conf.display.height as f32
+            || ball_center.y - ball_radius <= 0.0
+    }
+
     /// start the game main loop with ggez::event::run
     pub fn start() -> ! {
         let conf = config::Config::new("config.toml");
@@ -90,8 +99,19 @@ impl EventHandler for Game {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         while _ctx.time.check_update_time(self.conf.display.fps as u32) {}
 
-        let currently_pressed = _ctx.keyboard.pressed_keys();
+        if self.ball_wall_collision() {
+            self.ball.change_y_direction();
+        }
+        if self.player_paddle.hit_circle(self.ball.get_center(),self.ball.get_radius() as f32)
+        {
+            //todo! check who hit the ball  and ad the velocity
+            // each time if the paddle is in the direction the ball moves add speed
+            // if not, deduct speed
+            println!("{}","paddle hit ball");
+        }
+        self.ball.update_position();
 
+        let currently_pressed = _ctx.keyboard.pressed_keys();
         for key in currently_pressed {
             if let Some(direction) = Direction::from_keycode(key) {
                 self.player_paddle.update_position(&direction);

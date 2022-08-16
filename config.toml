@@ -8,19 +8,19 @@ fps = 60
 height = 200
 width = 10
 speed_x = 0
-speed_y = 8
+speed_y = 15
 
 [player_location]
 x = 1890
-y = 420
+y = 410
 
 [bot_location]
 x = 20
 y = 420
 
 [ball]
-radius = 20
-speed_x = 7
-speed_y = 10
+radius = 15
+speed_x = 5
+speed_y = 5
 x = 400
 y = 200
