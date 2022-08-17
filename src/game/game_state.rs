@@ -2,13 +2,10 @@ use std::{thread, time};
 
 use ggez;
 use ggez::event::{self, EventHandler};
-use ggez::input::keyboard;
-use ggez::input::keyboard::KeyCode::P;
-use ggez::input::keyboard::KeyInput;
 use ggez::mint::{Point2, Vector2};
 use ggez::{
     graphics::{self, Color},
-    Context, GameError, GameResult,
+    Context, GameResult,
 };
 use rand::Rng;
 
@@ -16,7 +13,7 @@ use crate::game::ball::Ball;
 
 use super::config;
 use super::entity::{Direction, Entity};
-use super::paddle::{self, Paddle};
+use super::paddle::Paddle;
 
 /// struct that handle the game managment/running and called with ggez::event
 pub(crate) struct Game {

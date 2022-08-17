@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::convert::From;
 
-use ggez::mint::{Point2, Vector2};
+use ggez::mint::Vector2;
 use ggez::{graphics, input::keyboard, GameResult};
 
 use crate::game::entity::Direction::{DownLeft, UpRight};
