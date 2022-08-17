@@ -123,7 +123,6 @@ impl Game {
 
         if ball_hit {
             if Direction::same_vertical(&hit_direction, &self.ball.get_direction()) {
-                //println!("paddle hit ball in the same velocity direction");
                 self.ball.accelerate_y(self.rng.gen_range(1.0..1.3));
             } else if Direction::opposite_vertical(&hit_direction, &self.ball.get_direction()) {
                 self.ball.accelerate_y(self.rng.gen_range(0.7..0.95));
