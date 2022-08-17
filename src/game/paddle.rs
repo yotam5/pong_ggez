@@ -2,7 +2,6 @@ use ggez::graphics::Color;
 use ggez::mint::{Point2, Vector2};
 use ggez::{self, graphics};
 
-use super::ball::Ball;
 use super::entity::{self, Direction};
 
 /// paddle struct which player hit the ball with

@@ -7,7 +7,7 @@ use ggez::{graphics, input::keyboard, GameResult};
 use crate::game::entity::Direction::{DownLeft, UpRight};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Direction {
+pub(super) enum Direction {
     Up,
     Down,
     Left,
@@ -40,21 +40,6 @@ impl From<Vector2<f32>> for Direction {
 }
 
 impl Direction {
-    /// find the inverse of the given direction/opposite direction
-    pub fn inverse(&self) -> Self {
-        match *self {
-            Direction::Up => Direction::Down,
-            Direction::Down => Direction::Up,
-            Direction::Left => Direction::Right,
-            Direction::Right => Direction::Left,
-            Direction::DownLeft => UpRight,
-            Direction::DownRight => Direction::UpLeft,
-            Direction::UpRight => DownLeft,
-            Direction::UpLeft => Direction::DownRight,
-            Direction::None => Direction::None,
-        }
-    }
-
     /// from keycode to the according direction
     pub fn from_keycode(key: &keyboard::KeyCode) -> Option<Direction> {
         match key {

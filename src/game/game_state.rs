@@ -74,12 +74,14 @@ impl Game {
         Ok(game)
     }
 
+    /// check if the ball went outside the window or passed the paddle
     fn ball_outside_window(&self) -> bool {
         let ball_center = self.ball.center();
         ball_center.x <= self.conf.bot_location.x as f32
             || ball_center.x >= self.conf.player_location.x as f32
     }
 
+    /// check for ball collision with the wall
     fn ball_wall_collision(&self) -> bool {
         let ball_center = self.ball.center();
         let ball_radius = self.ball.get_radius() as f32;
@@ -102,6 +104,7 @@ impl Game {
         event::run(ctx, event_loop, state);
     }
 
+    ///  handle paddle-ball collision increase/decrease speed
     fn handle_paddle_collision(&mut self) {
         let player_hit: bool = self
             .player_paddle
@@ -119,13 +122,10 @@ impl Game {
         }
 
         if ball_hit {
-            //println!("paddle hit ball");
-            //println!("{:?}-{:?}", hit_direction, self.ball.get_direction());
             if Direction::same_vertical(&hit_direction, &self.ball.get_direction()) {
                 //println!("paddle hit ball in the same velocity direction");
                 self.ball.accelerate_y(self.rng.gen_range(1.0..1.3));
             } else if Direction::opposite_vertical(&hit_direction, &self.ball.get_direction()) {
-                //println!("paddle hit ball in the opposite velocity direction");
                 self.ball.accelerate_y(self.rng.gen_range(0.7..0.95));
             }
 
@@ -149,13 +149,13 @@ impl Game {
         }
     }
 
+    /// handle the player paddle input and movment
     fn handle_player_paddle(&mut self, _ctx: &mut Context) {
         self.player_paddle.rest();
         let currently_pressed = _ctx.keyboard.pressed_keys();
         for key in currently_pressed {
             if let Some(direction) = Direction::from_keycode(key) {
                 self.player_paddle.update_position(&direction);
-                //println!("{}", "key preseed");
             }
         }
     }
