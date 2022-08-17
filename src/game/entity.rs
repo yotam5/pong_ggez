@@ -20,6 +20,7 @@ pub enum Direction {
 }
 
 impl From<Vector2<f32>> for Direction {
+    /// change vector of 2d velocity to direction
     fn from(v: Vector2<f32>) -> Direction {
         match (
             v.x.partial_cmp(&0.0).unwrap(),
@@ -39,6 +40,7 @@ impl From<Vector2<f32>> for Direction {
 }
 
 impl Direction {
+    /// find the inverse of the given direction/opposite direction
     pub fn inverse(&self) -> Self {
         match *self {
             Direction::Up => Direction::Down,
@@ -53,6 +55,7 @@ impl Direction {
         }
     }
 
+    /// from keycode to the according direction
     pub fn from_keycode(key: &keyboard::KeyCode) -> Option<Direction> {
         match key {
             keyboard::KeyCode::Up => Some(Direction::Up),
@@ -61,17 +64,42 @@ impl Direction {
         }
     }
 
-    pub fn to_keycode(key: &Direction) -> Option<ggez::winit::event::VirtualKeyCode> {
-        match key {
-            Direction::Up => Some(keyboard::KeyCode::Up),
-            Direction::Down => Some(keyboard::KeyCode::Down),
-            _ => None,
+    /// check if two directions have common Y vector
+    pub fn same_vertical(dir1: &Direction, dir2: &Direction) -> bool {
+        match (dir1, dir2) {
+            (
+                Direction::Up | Direction::UpRight | Direction::UpLeft,
+                Direction::Up | Direction::UpRight | Direction::UpLeft,
+            ) => true,
+            (
+                Direction::Down | Direction::DownLeft | Direction::DownRight,
+                Direction::Down | Direction::DownLeft | Direction::DownRight,
+            ) => true,
+
+            _ => false,
+        }
+    }
+
+    /// check if two directions have opposite Y vector
+    pub fn opposite_vertical(dir1: &Direction, dir2: &Direction) -> bool {
+        match (dir1, dir2) {
+            (
+                Direction::Up | Direction::UpRight | Direction::UpLeft,
+                Direction::Down | Direction::DownLeft | Direction::DownRight,
+            ) => true,
+            (
+                Direction::Down | Direction::DownLeft | Direction::DownRight,
+                Direction::Up | Direction::UpRight | Direction::UpLeft,
+            ) => true,
+            _ => false,
         }
     }
 }
 
 /// entity trait for game entities/objects
 pub(super) trait Entity {
+    /// return the velocity vector by ref
     fn get_velocity(&self) -> &Vector2<f32>;
+    /// draw the entity to the canvas
     fn draw(&self, ctx: &mut graphics::Canvas) -> GameResult<()>;
 }

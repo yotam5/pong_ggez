@@ -1,12 +1,16 @@
+use std::{thread, time};
+
 use ggez;
 use ggez::event::{self, EventHandler};
 use ggez::input::keyboard;
 use ggez::input::keyboard::KeyCode::P;
+use ggez::input::keyboard::KeyInput;
 use ggez::mint::{Point2, Vector2};
 use ggez::{
     graphics::{self, Color},
     Context, GameError, GameResult,
 };
+use rand::Rng;
 
 use crate::game::ball::Ball;
 
@@ -20,6 +24,7 @@ pub(crate) struct Game {
     bot_paddle: Paddle,
     conf: config::Config,
     ball: Ball,
+    rng: rand::rngs::ThreadRng,
 }
 
 impl Game {
@@ -66,13 +71,20 @@ impl Game {
                 conf.ball.radius,
             ),
             conf,
+            rng: rand::thread_rng(),
         };
 
         Ok(game)
     }
 
+    fn ball_outside_window(&self) -> bool {
+        let ball_center = self.ball.center();
+        ball_center.x <= self.conf.bot_location.x as f32
+            || ball_center.x >= self.conf.player_location.x as f32
+    }
+
     fn ball_wall_collision(&self) -> bool {
-        let ball_center = self.ball.get_center();
+        let ball_center = self.ball.center();
         let ball_radius = self.ball.get_radius() as f32;
 
         ball_center.y + ball_radius >= self.conf.display.height as f32
@@ -92,25 +104,56 @@ impl Game {
         let state = Game::new(&mut ctx).unwrap();
         event::run(ctx, event_loop, state);
     }
-}
 
-impl EventHandler for Game {
-    /// update the game each loop
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        while _ctx.time.check_update_time(self.conf.display.fps as u32) {}
+    fn handle_paddle_collision(&mut self) {
+        let player_hit: bool = self
+            .player_paddle
+            .hit_circle(self.ball.center(), self.ball.get_radius() as f32);
+        let bot_hit: bool = self
+            .bot_paddle
+            .hit_circle(self.ball.center(), self.ball.get_radius() as f32);
 
-        if self.ball_wall_collision() {
-            self.ball.change_y_direction();
+        let mut hit_direction = &Direction::None;
+        let ball_hit: bool = player_hit || bot_hit;
+        if player_hit {
+            hit_direction = self.player_paddle.get_current_direction();
+        } else if bot_hit {
+            hit_direction = self.bot_paddle.get_current_direction();
         }
-        if self.player_paddle.hit_circle(self.ball.get_center(),self.ball.get_radius() as f32)
-        {
-            //todo! check who hit the ball  and ad the velocity
-            // each time if the paddle is in the direction the ball moves add speed
-            // if not, deduct speed
-            println!("{}","paddle hit ball");
-        }
-        self.ball.update_position();
 
+        if ball_hit {
+            //println!("paddle hit ball");
+            //println!("{:?}-{:?}", hit_direction, self.ball.get_direction());
+            if Direction::same_vertical(&hit_direction, &self.ball.get_direction()) {
+                //println!("paddle hit ball in the same velocity direction");
+                self.ball.accelerate_y(self.rng.gen_range(1.0..1.3));
+            } else if Direction::opposite_vertical(&hit_direction, &self.ball.get_direction()) {
+                //println!("paddle hit ball in the opposite velocity direction");
+                self.ball.accelerate_y(self.rng.gen_range(0.7..0.95));
+            }
+
+            if rand::random()
+            {
+                self.ball.accelerate_x(self.rng.gen_range(1.0..1.3))
+            }
+            self.ball.change_x_direction();
+        }
+    }
+
+    fn handle_bot_paddle(&mut self) {
+        if [Direction::UpLeft, Direction::DownLeft].contains(&self.ball.get_direction()) {
+            let ball_center = self.ball.center();
+
+            if self.bot_paddle.top() >= ball_center.y {
+                self.bot_paddle.update_position(&Direction::Up);
+            } else if self.bot_paddle.bottom() <= ball_center.y {
+                self.bot_paddle.update_position(&Direction::Down);
+            }
+        }
+    }
+
+    fn handle_player_paddle(&mut self, _ctx: &mut Context) {
+        self.player_paddle.rest();
         let currently_pressed = _ctx.keyboard.pressed_keys();
         for key in currently_pressed {
             if let Some(direction) = Direction::from_keycode(key) {
@@ -118,6 +161,29 @@ impl EventHandler for Game {
                 //println!("{}", "key preseed");
             }
         }
+    }
+
+    fn handle_wall_collision(&mut self) {
+        if self.ball_wall_collision() {
+            self.ball.change_y_direction();
+        }
+    }
+}
+
+impl EventHandler for Game {
+    /// update the game each loop
+    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        while _ctx.time.check_update_time(self.conf.display.fps as u32) {}
+        if self.ball_outside_window() {
+            let three_sec = time::Duration::from_secs(3);
+            thread::sleep(three_sec);
+            ggez::event::request_quit(_ctx);
+        }
+        self.handle_wall_collision();
+        self.ball.update_position();
+        self.handle_paddle_collision();
+        self.handle_player_paddle(_ctx);
+        self.handle_bot_paddle();
 
         Ok(())
     }
@@ -131,14 +197,5 @@ impl EventHandler for Game {
         self.ball.draw(&mut canvas).unwrap();
         //end drawing here canvas.finish(_ctx)?;
         canvas.finish(_ctx)
-    }
-
-    fn key_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        _input: keyboard::KeyInput,
-        _repeated: bool,
-    ) -> Result<(), GameError> {
-        Ok(())
     }
 }

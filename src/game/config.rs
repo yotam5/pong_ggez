@@ -1,7 +1,9 @@
-use serde::Deserialize;
 use std::fs;
+
+use serde::Deserialize;
 use toml;
 
+/// contain the game configurations from the config.toml file
 #[derive(Deserialize)]
 pub(super) struct Config {
     pub display: MonitorConf,

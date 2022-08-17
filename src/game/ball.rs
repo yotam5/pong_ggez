@@ -44,19 +44,24 @@ impl Ball{
 		self.velocity.x *= -1.0;
 	}
 
+	pub fn get_direction(&self) -> Direction
+	{
+		self.velocity.into()
+	}
+
 	pub	fn update_position(&mut self){
 
 		self.center.x += self.velocity.x;
 		self.center.y += self.velocity.y;
-		self.direction = self.velocity.into();
-		println!("{:?}",self.direction);
+		self.direction = self.get_direction();
+		//println!("{:?}",self.direction);
 	}
 
 	pub fn get_radius(&self) -> u8 {
 		self.radius
 	}
 
-	pub fn get_center(&self) -> &Point2<f32>
+	pub fn center(&self) -> &Point2<f32>
 	{
 		&self.center
 	}

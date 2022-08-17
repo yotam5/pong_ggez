@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 ggez = "0.8.0-rc0"
-serde = {version = "1.0.143", features = ["derive"]}
+serde = { version = "1.0.143", features = ["derive"] }
 toml = "0.5.9"
+rand = "0.8.5"
