@@ -26,7 +26,7 @@ pub(crate) struct Game {
 
 impl Game {
     /// create new Game struct
-    pub fn new(_ctx: &mut Context) -> GameResult<Self> {
+    pub fn new(ctx: &mut Context) -> GameResult<Self> {
         let conf = config::Config::new("config.toml");
         let game = Game {
             player_paddle: Paddle::new(
@@ -56,7 +56,7 @@ impl Game {
                 conf.display.height as u16,
             ),
             ball: Ball::new(
-                _ctx,
+                ctx,
                 Point2 {
                     x: conf.ball.x as f32,
                     y: conf.ball.y as f32,
@@ -149,9 +149,9 @@ impl Game {
     }
 
     /// handle the player paddle input and movment
-    fn handle_player_paddle(&mut self, _ctx: &mut Context) {
+    fn handle_player_paddle(&mut self, ctx: &mut Context) {
         self.player_paddle.rest();
-        let currently_pressed = _ctx.keyboard.pressed_keys();
+        let currently_pressed = ctx.keyboard.pressed_keys();
         for key in currently_pressed {
             if let Some(direction) = Direction::from_keycode(key) {
                 self.player_paddle.update_position(&direction);
@@ -168,30 +168,30 @@ impl Game {
 
 impl EventHandler for Game {
     /// update the game each loop
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        while _ctx.time.check_update_time(self.conf.display.fps as u32) {}
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        while ctx.time.check_update_time(self.conf.display.fps as u32) {}
         if self.ball_outside_window() {
             let three_sec = time::Duration::from_secs(3);
             thread::sleep(three_sec);
-            ggez::event::request_quit(_ctx);
+            ctx.request_quit();
         }
         self.handle_wall_collision();
         self.ball.update_position();
         self.handle_paddle_collision();
-        self.handle_player_paddle(_ctx);
+        self.handle_player_paddle(ctx);
         self.handle_bot_paddle();
 
         Ok(())
     }
 
     /// handle drawing each game loop
-    fn draw(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        let mut canvas = graphics::Canvas::from_frame(_ctx, Color::BLACK);
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
         //start drawing here
         self.player_paddle.draw(&mut canvas).unwrap();
         self.bot_paddle.draw(&mut canvas).unwrap();
         self.ball.draw(&mut canvas).unwrap();
-        //end drawing here canvas.finish(_ctx)?;
-        canvas.finish(_ctx)
+        //end drawing here canvas.finish(ctx)?;
+        canvas.finish(ctx)
     }
 }

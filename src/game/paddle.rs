@@ -30,7 +30,7 @@ impl Paddle {
         }
     }
 
-    pub fn get_velocity_direction(&self) -> Direction {
+    pub fn _get_velocity_direction(&self) -> Direction {
         self.velocity.into()
     }
 
@@ -84,7 +84,7 @@ impl Paddle {
         self.paddle.bottom()
     }
 
-    pub fn center(&self) -> Point2<f32> {
+    pub fn _center(&self) -> Point2<f32> {
         self.paddle.center()
     }
 }
